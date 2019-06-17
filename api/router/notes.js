@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
+const moment = require("moment");
 
 const Note = require("../models/note");
 
@@ -10,20 +11,22 @@ router.get("/", (req, res, next) => {
     .exec()
     .then(docs => {
       const response = {
-        count: docs.length,
+        //count: docs.length,
         notes: docs.map(doc => {
           return {
+            id: doc.id,
             title: doc.title,
             content: doc.content,
-            date: doc.date,
-            request: {
-              type: "GET",
-              url: "http://localhost:5000/notes/" + doc._id
-            }
+            date: doc.date
+            // request: {
+            //   type: "GET",
+            //   url: " http://localhost:5000/notes/" + doc._id
+            // }
           };
         })
       };
-      res.status(200).json(response);
+      console.log(response);
+      res.status(200).json(response.notes);
     })
     .catch(err => {
       res.status(500).json({
@@ -33,11 +36,12 @@ router.get("/", (req, res, next) => {
 });
 
 router.post("/", (req, res, next) => {
+  var formatted_date = moment(req.body.date).format("YYYY-DD-MM");
   const note = new Note({
     _id: new mongoose.Types.ObjectId(),
     title: req.body.title,
     content: req.body.content,
-    date: req.body.date
+    date: formatted_date
   });
   note
     .save()
@@ -48,11 +52,11 @@ router.post("/", (req, res, next) => {
         createdNote: {
           title: result.title,
           content: result.content,
-          date: result.date,
-          request: {
-            type: "GET",
-            url: "http://localhost:5000/notes/" + result._id
-          }
+          date: result.date
+          // request: {
+          //   type: "GET",
+          //   url: "http://localhost:5000/notes/" + result._id
+          // }
         }
       });
     })
