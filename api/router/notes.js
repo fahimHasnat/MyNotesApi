@@ -25,7 +25,7 @@ router.get("/", (req, res, next) => {
           };
         })
       };
-      console.log(response);
+      //console.log(response);
       res.status(200).json(response.notes);
     })
     .catch(err => {
@@ -74,8 +74,9 @@ router.get("/:NotesId", (req, res, next) => {
     .select("title content date")
     .exec()
     .then(doc => {
-      console.log(doc);
       if (doc) {
+        // Object.assign(id, doc._id);
+        // console.log(doc);
         res.status(200).json(doc);
       } else {
         res.status(404).json({
