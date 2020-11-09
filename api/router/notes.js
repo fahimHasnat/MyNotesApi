@@ -48,7 +48,7 @@ router.post("/", (req, res, next) => {
     .then(result => {
       console.log(result);
       res.status(200).json({
-        message: "Created Product Successfully",
+        message: "Created note Successfully",
         createdNote: {
           title: result.title,
           content: result.content,
@@ -99,7 +99,7 @@ router.delete("/:NotesId", (req, res, next) => {
     .exec()
     .then(result => {
       res.status(200).json({
-        message: "Product Deleted",
+        message: "Note Deleted",
         request: {
           type: "POST"
         }
@@ -111,7 +111,7 @@ router.delete("/:NotesId", (req, res, next) => {
       });
     });
   res.status(200).json({
-    message: "Deleting SIngle GET requests"
+    message: "Deleting Note"
   });
 });
 
