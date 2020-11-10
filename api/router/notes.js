@@ -2,10 +2,13 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const moment = require("moment");
+const jwt = require('jsonwebtoken');
+const Authenticate = require('../middlewares/isAuth');
 
 const Note = require("../models/note");
+const User = require("../models/user");
 
-router.get("/", (req, res, next) => {
+router.get("/", Authenticate, (req, res, next) => {
   Note.find()
     .select("title content date")
     .exec()
@@ -35,7 +38,7 @@ router.get("/", (req, res, next) => {
     });
 });
 
-router.post("/", (req, res, next) => {
+router.post("/", Authenticate, (req, res, next) => {
   var formatted_date = moment(req.body.date).format("YYYY-DD-MM");
   const note = new Note({
     _id: new mongoose.Types.ObjectId(),
@@ -68,7 +71,7 @@ router.post("/", (req, res, next) => {
     });
 });
 
-router.get("/:NotesId", (req, res, next) => {
+router.get("/:NotesId", Authenticate, (req, res, next) => {
   const id = req.params.NotesId;
   Note.findById(id)
     .select("title content date")
@@ -92,7 +95,7 @@ router.get("/:NotesId", (req, res, next) => {
     });
 });
 
-router.delete("/:NotesId", (req, res, next) => {
+router.delete("/:NotesId", Authenticate, (req, res, next) => {
   const id = req.params.NotesId;
 
   Note.remove({ _id: id })
@@ -113,6 +116,43 @@ router.delete("/:NotesId", (req, res, next) => {
   res.status(200).json({
     message: "Deleting Note"
   });
+});
+
+router.post("/login", (req, res, next) => {
+  const { username, password } = req.body;
+
+  User.findOne({
+    username: username,
+    password: password
+  })
+    .exec()
+    .then(user => {
+      if (user) {
+        console.log(user);
+        const token = jwt.sign(
+          {
+            id: user._id,
+            username: user.username
+          },
+          "supersecret",
+          { expiresIn: "8h" }
+        );
+        console.log("token :", token);
+        res.status(200).json({
+          "message": "Logged In Successfully",
+          "token": token
+        });
+      } else {
+        res.status(200).json({
+          "message": "Unsuccessful.! Invalid User ID or Password"
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).json({
+        error: err
+      });
+    });
 });
 
 module.exports = router;
